@@ -59,6 +59,36 @@ export default function NewProductPage() {
         return allSizes.filter(size => size.categoryId === selectedCategory.id);
     }, [formData.category, categories, allSizes]);
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!formData.name || !formData.category || !formData.size) {
+            alert('Please fill in all required fields: Name, Category, and Size');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create product');
+            }
+
+            // Redirect to products list
+            window.location.href = '/admin/products';
+        } catch (error) {
+            console.error('Error creating product:', error);
+            alert('Failed to create product. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleAddImage = () => {
         setFormData({ ...formData, images: [...formData.images, ""] });
     };
@@ -114,7 +144,7 @@ export default function NewProductPage() {
                 <p className="text-muted-foreground">Create a new product page with AI-powered content.</p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-[1fr_300px]">
+            <form onSubmit={handleSubmit} className="grid gap-8 md:grid-cols-[1fr_300px]">
                 <div className="space-y-6 bg-card p-6 rounded-xl border border-border">
 
                     {/* Category & Size Selection */}
@@ -245,9 +275,13 @@ export default function NewProductPage() {
                     </div>
 
                     <div className="pt-4 border-t border-border">
-                        <button className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-md font-medium hover:bg-green-700 transition-colors">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-md font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                             <Save className="w-5 h-5" />
-                            Save Product Page
+                            {loading ? 'Saving...' : 'Save Product Page'}
                         </button>
                     </div>
                 </div>
@@ -277,7 +311,7 @@ export default function NewProductPage() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }
