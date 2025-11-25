@@ -40,15 +40,17 @@ export async function createProduct(formData: {
         throw new Error(`Size '${size}' not found in category '${category}'`);
     }
 
-    // 3. Create the Product
+    // 3. Create the Product with nested ProductImage records
     await prisma.product.create({
         data: {
             name,
             description,
             finish,
-            color, // Note: Schema might not have color yet, checking schema next
-            images,
+            color,
             sizeId: sizeRecord.id,
+            images: {
+                create: images.filter(url => url.trim()).map(url => ({ url })),
+            },
         },
     });
 
