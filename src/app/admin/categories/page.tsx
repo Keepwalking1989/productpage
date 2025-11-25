@@ -1,14 +1,28 @@
 import { Plus, Layers } from "lucide-react";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-export default function AdminCategoriesPage() {
-    // Mock Data
-    const categories = [
-        { id: "cat-1", name: "Porcelain Tiles", count: 120 },
-        { id: "cat-2", name: "Ceramic Tiles", count: 85 },
-        { id: "cat-3", name: "Slab Tiles", count: 40 },
-        { id: "cat-4", name: "Sanitary Ware", count: 25 },
-    ];
+export const dynamic = 'force-dynamic';
+
+export default async function AdminCategoriesPage() {
+    const categories = await prisma.category.findMany({
+        include: {
+            sizes: {
+                include: {
+                    _count: {
+                        select: { products: true },
+                    },
+                },
+            },
+        },
+        orderBy: { createdAt: 'desc' },
+    });
+
+    // Calculate total products for each category
+    const categoriesWithCounts = categories.map(category => ({
+        ...category,
+        productCount: category.sizes.reduce((sum, size) => sum + size._count.products, 0),
+    }));
 
     return (
         <div className="space-y-6">
@@ -35,20 +49,28 @@ export default function AdminCategoriesPage() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                        {categories.map((cat) => (
-                            <tr key={cat.id} className="hover:bg-accent/50 transition-colors">
-                                <td className="px-6 py-4 font-medium flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
-                                        <Layers className="w-4 h-4" />
-                                    </div>
-                                    {cat.name}
-                                </td>
-                                <td className="px-6 py-4 text-muted-foreground">{cat.count} products</td>
-                                <td className="px-6 py-4 text-right">
-                                    <button className="text-primary hover:underline">Edit</button>
+                        {categoriesWithCounts.length === 0 ? (
+                            <tr>
+                                <td colSpan={3} className="px-6 py-8 text-center text-muted-foreground">
+                                    No categories found. Add your first category!
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            categoriesWithCounts.map((cat) => (
+                                <tr key={cat.id} className="hover:bg-accent/50 transition-colors">
+                                    <td className="px-6 py-4 font-medium flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
+                                            <Layers className="w-4 h-4" />
+                                        </div>
+                                        {cat.name}
+                                    </td>
+                                    <td className="px-6 py-4 text-muted-foreground">{cat.productCount} products</td>
+                                    <td className="px-6 py-4 text-right">
+                                        <button className="text-primary hover:underline">Edit</button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
