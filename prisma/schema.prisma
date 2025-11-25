@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model Category {
@@ -37,7 +37,7 @@ model Size {
 model Product {
   id          String   @id @default(uuid())
   name        String
-  description String?
+  description String?  @db.Text
   sizeId      String
   finish      String?
   color       String?
