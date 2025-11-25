@@ -341,7 +341,7 @@ export default function EditProductForm({ productId }: { productId: string }) {
                         <div className="aspect-square bg-muted rounded-lg overflow-hidden relative group">
                             {formData.images[0] ? (
                                 <img
-                                    src={getGoogleDriveDirectLink(formData.images[0])}
+                                    src={getGoogleDriveDirectLink(formData.images[0]) || ""}
                                     alt="Preview"
                                     className="w-full h-full object-cover"
                                 />
