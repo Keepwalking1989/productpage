@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
-export default async function EditSizePage({ params }: { params: { id: string } }) {
+export default async function EditSizePage(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const size = await prisma.size.findUnique({
         where: { id: params.id },
         include: { category: true },

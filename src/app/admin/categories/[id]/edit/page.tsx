@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
-export default async function EditCategoryPage({ params }: { params: { id: string } }) {
+export default async function EditCategoryPage(props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     const category = await prisma.category.findUnique({
         where: { id: params.id },
     });
