@@ -1,12 +1,25 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { FilePlus, Save, Sparkles, Plus, X } from "lucide-react";
 import { generateProductInfo } from "@/app/actions/generate-product-info";
 import { getGoogleDriveDirectLink } from "@/lib/google-drive";
 
+type Category = {
+    id: string;
+    name: string;
+};
+
+type Size = {
+    id: string;
+    name: string;
+    categoryId: string;
+};
+
 export default function NewProductPage() {
     const [loading, setLoading] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [allSizes, setAllSizes] = useState<Size[]>([]);
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -16,6 +29,35 @@ export default function NewProductPage() {
         category: "",
         images: [""] as string[],
     });
+
+    useEffect(() => {
+        fetchCategories();
+        fetchSizes();
+    }, []);
+
+    const fetchCategories = async () => {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        setCategories(data.map((cat: any) => ({ id: cat.id, name: cat.name })));
+    };
+
+    const fetchSizes = async () => {
+        const response = await fetch('/api/sizes');
+        const data = await response.json();
+        setAllSizes(data.map((size: any) => ({
+            id: size.id,
+            name: size.name,
+            categoryId: size.category.id
+        })));
+    };
+
+    // Filter sizes based on selected category
+    const availableSizes = useMemo(() => {
+        if (!formData.category) return [];
+        const selectedCategory = categories.find(c => c.name === formData.category);
+        if (!selectedCategory) return [];
+        return allSizes.filter(size => size.categoryId === selectedCategory.id);
+    }, [formData.category, categories, allSizes]);
 
     const handleAddImage = () => {
         setFormData({ ...formData, images: [...formData.images, ""] });
@@ -82,12 +124,14 @@ export default function NewProductPage() {
                             <select
                                 className="w-full px-3 py-2 border border-input rounded-md bg-background"
                                 value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                onChange={(e) => setFormData({ ...formData, category: e.target.value, size: "" })}
                             >
                                 <option value="">Select Category</option>
-                                <option value="Porcelain Tiles">Porcelain Tiles</option>
-                                <option value="Ceramic Tiles">Ceramic Tiles</option>
-                                <option value="Slab Tiles">Slab Tiles</option>
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.name}>
+                                        {category.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         <div className="space-y-2">
@@ -96,11 +140,14 @@ export default function NewProductPage() {
                                 className="w-full px-3 py-2 border border-input rounded-md bg-background"
                                 value={formData.size}
                                 onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                                disabled={!formData.category}
                             >
                                 <option value="">Select Size</option>
-                                <option value="600x1200">600x1200 mm</option>
-                                <option value="600x600">600x600 mm</option>
-                                <option value="800x800">800x800 mm</option>
+                                {availableSizes.map((size) => (
+                                    <option key={size.id} value={size.name}>
+                                        {size.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     </div>

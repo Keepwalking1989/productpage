@@ -1,6 +1,8 @@
 import { Save } from "lucide-react";
 import { createCategory } from "@/app/actions/create-category";
 
+export const dynamic = 'force-dynamic';
+
 export default function NewCategoryPage() {
     return (
         <div className="max-w-2xl space-y-8">
