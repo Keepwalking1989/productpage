@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sizes Size[]
+
+  @@map("categories")
+}
+
+model Size {
+  id          String   @id @default(uuid())
+  name        String   // e.g., "600x1200 mm"
+  description String?
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  products Product[]
+  catalogs Catalog[]
+
+  @@map("sizes")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  sizeId      String
+  finish      String?
+  color       String?
+  images      ProductImage[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  size Size @relation(fields: [sizeId], references: [id], onDelete: Cascade)
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  url       String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+// Keeping Catalog for flipbooks, linked to Size as before? 
+// User didn't explicitly mention Catalog changes, but usually catalogs are per size/collection.
+// Let's keep it linked to Size for now.
+model Catalog {
+  id           String   @id @default(uuid())
+  title        String
+  pdfUrl       String
+  thumbnailUrl String?
+  sizeId       String?  // Optional now as it might be general
+  createdAt    DateTime @default(now())
+
+  size Size? @relation(fields: [sizeId], references: [id])
+
+  @@map("catalogs")
+}

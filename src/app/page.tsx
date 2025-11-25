@@ -1,65 +1,134 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, Layers, Maximize2, Palette } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-black">
+        <div className="absolute inset-0 z-0 opacity-50">
+          {/* Placeholder for Video Background - using a high-quality gradient/image for now */}
+          <div className="w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-700 via-gray-900 to-black" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto space-y-8">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-5xl md:text-7xl font-bold tracking-tighter text-white"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Elevate Your Space with <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+              Timeless Porcelain
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="text-xl text-gray-300 max-w-2xl mx-auto"
           >
-            Documentation
-          </a>
+            Discover over 1000+ premium designs. From classic marble to modern concrete,
+            find the perfect foundation for your vision.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <Link
+              href="/products"
+              className="px-8 py-4 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition-colors flex items-center gap-2"
+            >
+              Explore Collection <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/catalogs"
+              className="px-8 py-4 border border-white/30 text-white font-semibold rounded-full hover:bg-white/10 transition-colors backdrop-blur-sm"
+            >
+              View Catalogs
+            </Link>
+          </motion.div>
         </div>
-      </main>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24 bg-background">
+        <div className="container px-4 mx-auto">
+          <div className="grid md:grid-cols-3 gap-12">
+            {[
+              {
+                icon: Layers,
+                title: "Premium Quality",
+                desc: "Crafted with precision engineering for durability and elegance."
+              },
+              {
+                icon: Maximize2,
+                title: "Various Sizes",
+                desc: "From 600x600 to large format 1200x2400 slabs for seamless looks."
+              },
+              {
+                icon: Palette,
+                title: "1000+ Designs",
+                desc: "Endless possibilities with our extensive collection of finishes."
+              }
+            ].map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.2 }}
+                className="text-center space-y-4 p-6 rounded-2xl hover:bg-accent/50 transition-colors"
+              >
+                <div className="w-16 h-16 mx-auto bg-primary/5 rounded-full flex items-center justify-center text-primary">
+                  <feature.icon className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold">{feature.title}</h3>
+                <p className="text-muted-foreground">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Preview */}
+      <section className="py-24 bg-muted/30">
+        <div className="container px-4 mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl md:text-4xl font-bold">Curated Collections</h2>
+            <p className="text-muted-foreground">Browse by category to find your style</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {["Porcelain Tiles", "Ceramic Tiles", "Slab Tiles", "Sanitary Ware", "Artificial Quartz", "Mosaic"].map((cat, i) => (
+              <Link
+                key={i}
+                href={`/products?category=${cat}`}
+                className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-200"
+              >
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors z-10" />
+                {/* Placeholder Image */}
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-300 to-gray-400 group-hover:scale-105 transition-transform duration-500" />
+
+                <div className="absolute bottom-0 left-0 p-6 z-20">
+                  <h3 className="text-2xl font-bold text-white mb-2">{cat}</h3>
+                  <span className="text-white/80 text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+                    View Products <ArrowRight className="w-4 h-4" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
