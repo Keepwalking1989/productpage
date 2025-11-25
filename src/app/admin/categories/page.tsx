@@ -94,7 +94,12 @@ export default function AdminCategoriesPage() {
                                         </td>
                                         <td className="px-6 py-4 text-muted-foreground">{productCount} products</td>
                                         <td className="px-6 py-4 text-right space-x-2">
-                                            <button className="text-primary hover:underline">Edit</button>
+                                            <Link
+                                                href={`/admin/categories/${cat.id}/edit`}
+                                                className="text-primary hover:underline"
+                                            >
+                                                Edit
+                                            </Link>
                                             <button
                                                 onClick={() => handleDelete(cat.id, sizeCount)}
                                                 className="text-destructive hover:underline inline-flex items-center gap-1"

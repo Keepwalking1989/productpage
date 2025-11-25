@@ -2,6 +2,7 @@ import { Plus, Package, Search } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getGoogleDriveDirectLink } from "@/lib/google-drive";
+import { ProductActions } from "./product-actions";
 
 // Force dynamic rendering to ensure fresh data
 export const dynamic = 'force-dynamic';
@@ -109,7 +110,7 @@ export default async function AdminProductsPage() {
                                             {product.finish || "-"}
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="text-primary hover:underline">Edit</button>
+                                            <ProductActions product={product} />
                                         </td>
                                     </tr>
                                 );

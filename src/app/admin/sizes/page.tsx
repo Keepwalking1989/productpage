@@ -93,7 +93,12 @@ export default function AdminSizesPage() {
                                     <td className="px-6 py-4 text-muted-foreground">{size.category.name}</td>
                                     <td className="px-6 py-4 text-muted-foreground">{size._count.products} products</td>
                                     <td className="px-6 py-4 text-right space-x-2">
-                                        <button className="text-primary hover:underline">Edit</button>
+                                        <Link
+                                            href={`/admin/sizes/${size.id}/edit`}
+                                            className="text-primary hover:underline"
+                                        >
+                                            Edit
+                                        </Link>
                                         <button
                                             onClick={() => handleDelete(size.id, size._count.products)}
                                             className="text-destructive hover:underline inline-flex items-center gap-1"
