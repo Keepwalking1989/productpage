@@ -49,3 +49,13 @@ export function getGoogleDrivePdfLink(url: string): string | null {
 
     return `https://drive.google.com/uc?export=view&id=${fileId}`;
 }
+
+/**
+ * Converts a Google Drive shareable link into a direct download link.
+ */
+export function getGoogleDriveDownloadLink(url: string): string | null {
+    const fileId = getGoogleDriveFileId(url);
+    if (!fileId) return null;
+
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+}

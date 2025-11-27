@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getCatalogById } from "@/app/actions/get-catalog-data";
 import { FlipBookViewer } from "@/components/flip-book-viewer";
-import { getGoogleDrivePdfLink } from "@/lib/google-drive";
+import { getGoogleDrivePdfLink, getGoogleDriveDownloadLink } from "@/lib/google-drive";
 
 export const metadata = {
     title: "Catalog Viewer | Porcelain Tiles AI",
@@ -21,6 +21,7 @@ export default async function CatalogBookPage({
 
     // Use the direct PDF link logic
     const pdfUrl = getGoogleDrivePdfLink(catalog.pdfUrl) || catalog.pdfUrl;
+    const downloadUrl = getGoogleDriveDownloadLink(catalog.pdfUrl) || catalog.pdfUrl;
 
-    return <FlipBookViewer pdfUrl={pdfUrl} title={catalog.title} />;
+    return <FlipBookViewer pdfUrl={pdfUrl} title={catalog.title} downloadUrl={downloadUrl} />;
 }

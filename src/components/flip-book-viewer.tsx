@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import HTMLFlipBook from 'react-pageflip';
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, X, Download } from 'lucide-react';
 import Link from 'next/link';
 
 // Styles for react-pdf
@@ -16,9 +16,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 interface FlipBookViewerProps {
     pdfUrl: string;
     title: string;
+    downloadUrl?: string;
 }
 
-export function FlipBookViewer({ pdfUrl, title }: FlipBookViewerProps) {
+export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerProps) {
     const [numPages, setNumPages] = useState<number>(0);
     const [pageNumber, setPageNumber] = useState(0); // 0-indexed for flipbook logic usually, but let's see
     const book = useRef<any>(null);
@@ -79,7 +80,17 @@ export function FlipBookViewer({ pdfUrl, title }: FlipBookViewerProps) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    {/* Zoom is tricky with flipbook, skipping for now to ensure stability */}
+                    {downloadUrl && (
+                        <a
+                            href={downloadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 hover:bg-zinc-700 rounded-full transition-colors"
+                            title="Download PDF"
+                        >
+                            <Download className="w-5 h-5" />
+                        </a>
+                    )}
                 </div>
             </div>
 

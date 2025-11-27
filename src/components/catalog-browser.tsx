@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Category, Size, Catalog } from '@prisma/client';
 import { getSizesByCategory, getCatalogsBySize } from '@/app/actions/get-catalog-data';
-import { getGoogleDriveDirectLink } from '@/lib/google-drive';
+import { getGoogleDriveDirectLink, getGoogleDriveDownloadLink } from '@/lib/google-drive';
 import { ArrowLeft, BookOpen, Download, Layers, Maximize2, FileText, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -185,7 +185,7 @@ export function CatalogBrowser({ initialCategories }: CatalogBrowserProps) {
                     >
                         {catalogs.length > 0 ? catalogs.map((catalog) => {
                             const thumbUrl = catalog.thumbnailUrl ? (getGoogleDriveDirectLink(catalog.thumbnailUrl) || catalog.thumbnailUrl) : null;
-                            const pdfUrl = getGoogleDriveDirectLink(catalog.pdfUrl) || catalog.pdfUrl;
+                            const pdfDownloadUrl = getGoogleDriveDownloadLink(catalog.pdfUrl) || catalog.pdfUrl;
 
                             return (
                                 <div key={catalog.id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all">
@@ -212,7 +212,7 @@ export function CatalogBrowser({ initialCategories }: CatalogBrowserProps) {
                                                 <BookOpen className="w-4 h-4" /> See as Book
                                             </Link>
                                             <a
-                                                href={pdfUrl}
+                                                href={pdfDownloadUrl}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
