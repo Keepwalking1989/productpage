@@ -43,21 +43,24 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
     const [pageNumber, setPageNumber] = useState(0);
     const book = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [containerWidth, setContainerWidth] = useState(800);
+    const [containerDimensions, setContainerDimensions] = useState({ width: 800, height: 600 });
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const updateWidth = () => {
+        const updateDimensions = () => {
             if (containerRef.current) {
-                setContainerWidth(containerRef.current.clientWidth);
+                setContainerDimensions({
+                    width: containerRef.current.clientWidth,
+                    height: containerRef.current.clientHeight
+                });
             }
         };
 
-        window.addEventListener('resize', updateWidth);
+        window.addEventListener('resize', updateDimensions);
         // Small delay to ensure container is rendered
-        setTimeout(updateWidth, 100);
+        setTimeout(updateDimensions, 100);
 
-        return () => window.removeEventListener('resize', updateWidth);
+        return () => window.removeEventListener('resize', updateDimensions);
     }, []);
 
     function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
@@ -70,15 +73,22 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
         setError('Failed to load PDF. Please try downloading it instead.');
     }
 
-    // Calculate optimal dimensions
-    // Use a max width to prevent it from being too large on huge screens
-    const width = Math.min(550, (containerWidth / 2) - 20);
-    const height = width * 1.414; // A4 aspect ratio
+    // Calculate optimal dimensions to maximize screen usage
+    // We assume a 2-page spread view (book mode)
+    // Available width for a single page is half the container width
+    const availablePageWidth = (containerDimensions.width / 2);
+    const availablePageHeight = containerDimensions.height;
+
+    // We define a maximum size but try to fill the available space
+    // Removing the hardcoded A4 ratio (1.414) allows landscape pages to fit better
+    // We use a slight margin to ensure controls are visible
+    const width = Math.min(800, availablePageWidth - 10);
+    const height = Math.min(1200, availablePageHeight - 20);
 
     return (
         <div className="flex flex-col h-screen bg-zinc-900 text-white overflow-hidden">
             {/* Toolbar */}
-            <div className="flex items-center justify-between p-4 bg-zinc-800 border-b border-zinc-700 z-10">
+            <div className="flex items-center justify-between p-4 bg-zinc-800 border-b border-zinc-700 z-10 shrink-0">
                 <div className="flex items-center gap-4">
                     <Link href="/catalogs" className="p-2 hover:bg-zinc-700 rounded-full transition-colors">
                         <X className="w-6 h-6" />
@@ -125,7 +135,7 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
             </div>
 
             {/* Viewer Area */}
-            <div className="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-hidden bg-zinc-900/50 relative" ref={containerRef}>
+            <div className="flex-1 flex items-center justify-center overflow-hidden bg-zinc-900/50 relative" ref={containerRef}>
                 {error ? (
                     <div className="text-center p-6 bg-zinc-800 rounded-xl max-w-md">
                         <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -153,7 +163,7 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
                                 <p>Loading Catalog...</p>
                             </div>
                         }
-                        className="flex justify-center"
+                        className="flex justify-center items-center"
                     >
                         {numPages > 0 && (
                             // @ts-ignore - Types for react-pageflip are sometimes loose
@@ -161,10 +171,10 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
                                 width={width}
                                 height={height}
                                 size="stretch"
-                                minWidth={300}
+                                minWidth={200}
                                 maxWidth={1000}
-                                minHeight={400}
-                                maxHeight={1533}
+                                minHeight={300}
+                                maxHeight={1500}
                                 maxShadowOpacity={0.5}
                                 showCover={true}
                                 mobileScrollSupport={true}
@@ -187,18 +197,16 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
                                     const PageComponent = index === 0 || index === numPages - 1 ? PageCover : PageContent;
                                     return (
                                         <PageComponent key={index} number={index + 1}>
-                                            <Page
-                                                pageNumber={index + 1}
-                                                width={width}
-                                                renderAnnotationLayer={false}
-                                                renderTextLayer={false}
-                                                className="w-full h-full"
-                                                loading={
-                                                    <div className="w-full h-full flex items-center justify-center bg-white text-zinc-300">
-                                                        <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                                    </div>
-                                                }
-                                            />
+                                            <div className="relative w-full h-full flex items-center justify-center bg-white">
+                                                <Page
+                                                    pageNumber={index + 1}
+                                                    width={width}
+                                                    height={height}
+                                                    renderAnnotationLayer={false}
+                                                    renderTextLayer={false}
+                                                    className="max-w-full max-h-full object-contain"
+                                                />
+                                            </div>
                                             <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-mono">
                                                 {index + 1}
                                             </div>
