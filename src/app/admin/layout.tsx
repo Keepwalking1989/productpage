@@ -1,11 +1,19 @@
 import Link from "next/link";
 import { LayoutDashboard, Package, BookOpen, Settings, Layers, Maximize2 } from "lucide-react";
+import { getSession } from "@/lib/session";
+import { LogoutButton } from "./logout-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
-export default function AdminLayout({
+export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const session = await getSession();
+    const userName = session.name || 'Admin User';
+    const userEmail = session.email || 'admin@example.com';
+    const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
     return (
         <div className="flex min-h-screen bg-muted/20">
             {/* Sidebar */}
@@ -57,16 +65,21 @@ export default function AdminLayout({
                         Settings
                     </Link>
                 </nav>
-                <div className="p-4 border-t border-border">
+                <div className="p-4 border-t border-border space-y-4">
+                    <div className="px-4">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Theme</p>
+                        <ThemeToggle />
+                    </div>
                     <div className="flex items-center gap-3 px-4 py-2">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                            AD
+                            {userInitials}
                         </div>
-                        <div className="text-sm">
-                            <p className="font-medium">Admin User</p>
-                            <p className="text-xs text-muted-foreground">admin@example.com</p>
+                        <div className="text-sm flex-1 min-w-0">
+                            <p className="font-medium truncate">{userName}</p>
+                            <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
                         </div>
                     </div>
+                    <LogoutButton />
                 </div>
             </aside>
 

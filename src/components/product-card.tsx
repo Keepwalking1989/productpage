@@ -1,44 +1,67 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ProductWithDetails } from "@/app/actions/get-products";
+import { getGoogleDriveDirectLink } from "@/lib/google-drive";
 
 interface ProductCardProps {
-    id: string;
-    name: string;
-    size: string;
-    imageUrl: string;
-    category: string;
+    product: ProductWithDetails;
 }
 
-export function ProductCard({ id, name, size, imageUrl, category }: ProductCardProps) {
-    return (
-        <Link href={`/products/${id}`} className="group block space-y-3">
-            <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-gray-100">
-                {/* Image Placeholder - In real app use Next.js Image with Google Drive Direct Link */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={imageUrl || "https://placehold.co/600x800?text=Tile+Design"}
-                    alt={name}
-                    className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
-                />
+export function ProductCard({ product }: ProductCardProps) {
+    const mainImage = product.images[0]?.url;
+    const imageUrl = mainImage ? (getGoogleDriveDirectLink(mainImage) || mainImage) : null;
 
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-sm">
-                        <ArrowUpRight className="w-4 h-4 text-black" />
+    return (
+        <Link href={`/products/${product.id}`} className="group block h-full">
+            <div className="bg-card border border-border rounded-xl overflow-hidden h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                {/* Image */}
+                <div className="aspect-square bg-muted relative overflow-hidden">
+                    {imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            src={imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted">
+                            No Image
+                        </div>
+                    )}
+
+                    {/* Overlay Badge */}
+                    <div className="absolute top-2 right-2">
+                        <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                            {product.size.category.name}
+                        </span>
                     </div>
                 </div>
 
-                <div className="absolute bottom-3 left-3">
-                    <span className="px-2 py-1 text-xs font-medium bg-black/60 text-white backdrop-blur-md rounded-md">
-                        {size}
-                    </span>
-                </div>
-            </div>
+                {/* Content */}
+                <div className="p-4 space-y-2">
+                    <h3 className="font-semibold text-lg truncate group-hover:text-primary transition-colors">
+                        {product.name}
+                    </h3>
 
-            <div>
-                <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors">
-                    {name}
-                </h3>
-                <p className="text-sm text-muted-foreground">{category}</p>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                        <div className="flex justify-between">
+                            <span>Size:</span>
+                            <span className="font-medium text-foreground">{product.size.name}</span>
+                        </div>
+                        {product.finish && (
+                            <div className="flex justify-between">
+                                <span>Finish:</span>
+                                <span className="font-medium text-foreground">{product.finish}</span>
+                            </div>
+                        )}
+                        {product.color && (
+                            <div className="flex justify-between">
+                                <span>Color:</span>
+                                <span className="font-medium text-foreground">{product.color}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </Link>
     );

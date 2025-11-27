@@ -208,6 +208,7 @@ export default function NewProductPage() {
                                 />
                                 {index > 0 && (
                                     <button
+                                        type="button"
                                         onClick={() => handleRemoveImage(index)}
                                         className="p-2 text-destructive hover:bg-destructive/10 rounded-md"
                                     >
@@ -217,6 +218,7 @@ export default function NewProductPage() {
                             </div>
                         ))}
                         <button
+                            type="button"
                             onClick={handleAddImage}
                             className="text-sm text-primary flex items-center gap-1 hover:underline"
                         >
@@ -234,6 +236,7 @@ export default function NewProductPage() {
                             <p className="text-sm text-muted-foreground">Generate description, finish, and color from image.</p>
                         </div>
                         <button
+                            type="button"
                             onClick={handleGenerateInfo}
                             disabled={loading}
                             className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
@@ -289,21 +292,33 @@ export default function NewProductPage() {
                 {/* Preview Sidebar */}
                 <div className="space-y-6">
                     <div className="bg-card p-4 rounded-xl border border-border sticky top-6">
-                        <h3 className="font-semibold mb-4">Preview</h3>
-                        <div className="aspect-square bg-muted rounded-lg overflow-hidden relative mb-4">
-                            {previewImageUrl ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={previewImageUrl}
-                                    alt="Preview"
-                                    className="w-full h-full object-cover"
-                                    referrerPolicy="no-referrer"
-                                />
-                            ) : (
-                                <div className="flex items-center justify-center h-full text-muted-foreground">
-                                    No Image
-                                </div>
-                            )}
+                        <h3 className="font-semibold mb-4">Image Previews</h3>
+                        <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                            {formData.images.map((imageUrl, index) => {
+                                const directUrl = imageUrl ? (getGoogleDriveDirectLink(imageUrl) || imageUrl) : null;
+                                return (
+                                    <div key={index} className="space-y-2">
+                                        <p className="text-xs text-muted-foreground font-medium">
+                                            Image {index + 1}
+                                        </p>
+                                        <div className="aspect-square bg-muted rounded-lg overflow-hidden relative">
+                                            {directUrl ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img
+                                                    src={directUrl}
+                                                    alt={`Preview ${index + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                    referrerPolicy="no-referrer"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                                                    No Image
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                         <div className="space-y-2">
                             <p className="font-medium">{formData.name || "Product Name"}</p>

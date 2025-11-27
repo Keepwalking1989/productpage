@@ -38,3 +38,14 @@ export function getGoogleDriveDirectLink(url: string): string | null {
 export function isGoogleDriveLink(url: string): boolean {
     return url.includes("drive.google.com");
 }
+
+/**
+ * Converts a Google Drive shareable link into a direct PDF link.
+ * Note: This might still face CORS issues depending on the client.
+ */
+export function getGoogleDrivePdfLink(url: string): string | null {
+    const fileId = getGoogleDriveFileId(url);
+    if (!fileId) return null;
+
+    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+}

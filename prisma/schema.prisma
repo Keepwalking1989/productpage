@@ -13,64 +13,74 @@ model Category {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  sizes Size[]
+  sizes       Size[]
 
   @@map("categories")
 }
 
 model Size {
-  id          String   @id @default(uuid())
-  name        String   // e.g., "600x1200 mm"
+  id          String    @id @default(uuid())
+  name        String
   description String?
   categoryId  String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  catalogs    Catalog[]
+  products    Product[]
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  category Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  products Product[]
-  catalogs Catalog[]
-
+  @@index([categoryId], map: "sizes_categoryId_fkey")
   @@map("sizes")
 }
 
 model Product {
-  id          String   @id @default(uuid())
+  id          String         @id @default(uuid())
   name        String
-  description String?  @db.Text
+  description String?        @db.Text
   sizeId      String
   finish      String?
   color       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   images      ProductImage[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  size        Size           @relation(fields: [sizeId], references: [id], onDelete: Cascade)
 
-  size Size @relation(fields: [sizeId], references: [id], onDelete: Cascade)
-
+  @@index([sizeId], map: "products_sizeId_fkey")
   @@map("products")
 }
 
+
 model ProductImage {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   url       String
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  @@index([productId], map: "product_images_productId_fkey")
   @@map("product_images")
 }
 
-// Keeping Catalog for flipbooks, linked to Size as before? 
-// User didn't explicitly mention Catalog changes, but usually catalogs are per size/collection.
-// Let's keep it linked to Size for now.
 model Catalog {
   id           String   @id @default(uuid())
   title        String
   pdfUrl       String
   thumbnailUrl String?
-  sizeId       String?  // Optional now as it might be general
+  sizeId       String
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  size Size? @relation(fields: [sizeId], references: [id])
+  size Size @relation(fields: [sizeId], references: [id], onDelete: Cascade)
 
   @@map("catalogs")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Will be hashed
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
 }
