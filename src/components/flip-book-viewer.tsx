@@ -44,6 +44,7 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
     const book = useRef<any>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerDimensions, setContainerDimensions] = useState({ width: 800, height: 600 });
+    const [pdfDimensions, setPdfDimensions] = useState<{ width: number; height: number } | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -57,15 +58,25 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
         };
 
         window.addEventListener('resize', updateDimensions);
-        // Small delay to ensure container is rendered
         setTimeout(updateDimensions, 100);
 
         return () => window.removeEventListener('resize', updateDimensions);
     }, []);
 
-    function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-        setNumPages(numPages);
+    async function onDocumentLoadSuccess(pdf: any) {
+        setNumPages(pdf.numPages);
         setError(null);
+
+        try {
+            // Get dimensions of the first page to determine aspect ratio
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({ scale: 1 });
+            setPdfDimensions({ width: viewport.width, height: viewport.height });
+        } catch (e) {
+            console.error("Failed to get page dimensions", e);
+            // Fallback to standard A4 if failed
+            setPdfDimensions({ width: 595, height: 842 });
+        }
     }
 
     function onDocumentLoadError(err: Error) {
@@ -73,17 +84,34 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
         setError('Failed to load PDF. Please try downloading it instead.');
     }
 
-    // Calculate optimal dimensions to maximize screen usage
-    // We assume a 2-page spread view (book mode)
-    // Available width for a single page is half the container width
-    const availablePageWidth = (containerDimensions.width / 2);
-    const availablePageHeight = containerDimensions.height;
+    // Calculate optimal dimensions
+    const availableWidth = containerDimensions.width;
+    const availableHeight = containerDimensions.height;
 
-    // We define a maximum size but try to fill the available space
-    // Removing the hardcoded A4 ratio (1.414) allows landscape pages to fit better
-    // We use a slight margin to ensure controls are visible
-    const width = Math.min(800, availablePageWidth - 10);
-    const height = Math.min(1200, availablePageHeight - 20);
+    // Default to A4 portrait if not loaded yet
+    let bookWidth = 400;
+    let bookHeight = 600;
+
+    if (pdfDimensions) {
+        const pdfAspectRatio = pdfDimensions.width / pdfDimensions.height;
+
+        // In 2-page view, the book aspect ratio (width/height) is effectively double the page aspect ratio
+        // But here 'width' is for a SINGLE page.
+
+        // We want to fit a single page into (availableWidth / 2) x availableHeight
+        const maxPageWidth = (availableWidth / 2) - 10; // margin
+        const maxPageHeight = availableHeight - 20; // margin
+
+        // Try fitting by height first
+        bookHeight = maxPageHeight;
+        bookWidth = bookHeight * pdfAspectRatio;
+
+        // If width is too big, fit by width
+        if (bookWidth > maxPageWidth) {
+            bookWidth = maxPageWidth;
+            bookHeight = bookWidth / pdfAspectRatio;
+        }
+    }
 
     return (
         <div className="flex flex-col h-screen bg-zinc-900 text-white overflow-hidden">
@@ -165,16 +193,16 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
                         }
                         className="flex justify-center items-center"
                     >
-                        {numPages > 0 && (
+                        {numPages > 0 && pdfDimensions && (
                             // @ts-ignore - Types for react-pageflip are sometimes loose
                             <HTMLFlipBook
-                                width={width}
-                                height={height}
-                                size="stretch"
+                                width={Math.floor(bookWidth)}
+                                height={Math.floor(bookHeight)}
+                                size="fixed"
                                 minWidth={200}
-                                maxWidth={1000}
+                                maxWidth={1500}
                                 minHeight={300}
-                                maxHeight={1500}
+                                maxHeight={2000}
                                 maxShadowOpacity={0.5}
                                 showCover={true}
                                 mobileScrollSupport={true}
@@ -197,14 +225,13 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
                                     const PageComponent = index === 0 || index === numPages - 1 ? PageCover : PageContent;
                                     return (
                                         <PageComponent key={index} number={index + 1}>
-                                            <div className="relative w-full h-full flex items-center justify-center bg-white">
+                                            <div className="w-full h-full flex items-center justify-center bg-white">
                                                 <Page
                                                     pageNumber={index + 1}
-                                                    width={width}
-                                                    height={height}
+                                                    width={Math.floor(bookWidth)}
                                                     renderAnnotationLayer={false}
                                                     renderTextLayer={false}
-                                                    className="max-w-full max-h-full object-contain"
+                                                    className="w-full h-full"
                                                 />
                                             </div>
                                             <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-mono">
