@@ -5,7 +5,7 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import HTMLFlipBook from 'react-pageflip';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, X, Download, AlertCircle, Camera, Mail, Heart, List, MessageCircle, Trash2, Share2 } from 'lucide-react';
 import Link from 'next/link';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 
 // Styles for react-pdf
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -100,7 +100,7 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
 
     function onDocumentLoadError(err: Error) {
         console.error('PDF Load Error:', err);
-        setError('Failed to load PDF. Please try downloading it instead.');
+        setError('We value your time, And We request you to Click on Download button Below.');
     }
 
     const handleScreenshot = async () => {
@@ -113,16 +113,14 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
             const element = document.querySelector('.react-pageflip-wrapper') as HTMLElement || containerRef.current;
 
             if (element) {
-                const canvas = await html2canvas(element, {
-                    useCORS: true,
-                    allowTaint: true,
+                // html-to-image is often more robust with modern CSS
+                const dataUrl = await toPng(element, {
                     backgroundColor: '#18181b', // Match zinc-900
-                    scale: 2, // Higher quality
+                    pixelRatio: 2, // Higher quality
                 });
 
-                const image = canvas.toDataURL('image/png');
                 const link = document.createElement('a');
-                link.href = image;
+                link.href = dataUrl;
                 link.download = `${title.replace(/\s+/g, '_')}_Page_${pageNumber + 1}.png`;
                 link.click();
             }
