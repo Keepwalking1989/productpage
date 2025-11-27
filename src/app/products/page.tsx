@@ -6,9 +6,11 @@ export default function ProductsPage() {
     const products = Array.from({ length: 12 }).map((_, i) => ({
         id: `prod-${i}`,
         name: `Statuario Premium ${i + 1}`,
-        size: i % 2 === 0 ? "600x1200" : "800x800",
-        category: "Porcelain Tiles",
-        imageUrl: "", // Placeholder
+        size: {
+            name: i % 2 === 0 ? "600x1200" : "800x800",
+            category: { name: "Porcelain Tiles" },
+        },
+        images: [{ url: "" }], // Placeholder image URL
     }));
 
     return (
@@ -56,7 +58,7 @@ export default function ProductsPage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {products.map((product) => (
-                                <ProductCard key={product.id} {...product} />
+                                <ProductCard key={product.id} product={product as any} />
                             ))}
                         </div>
                     </div>

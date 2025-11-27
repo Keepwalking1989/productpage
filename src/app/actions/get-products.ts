@@ -34,7 +34,7 @@ export async function getProducts({
     limit = 12,
 }: GetProductsParams = {}) {
     try {
-        const where: Prisma.ProductWhereInput = {};
+        let where: any = {};
 
         // Search
         if (search) {
@@ -54,9 +54,10 @@ export async function getProducts({
         }
 
         if (size) {
+            // Preserve existing filters and apply name equals filter
             where.size = {
-                ...where.size, // Preserve category filter if exists
-                name: size,
+                ...(where.size ?? {}),
+                name: { equals: size },
             };
         }
 
