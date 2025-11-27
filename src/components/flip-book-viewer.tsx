@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect, forwardRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import HTMLFlipBook from 'react-pageflip';
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, X, Download, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, X, Download, AlertCircle, Camera, Mail, Heart, List, MessageCircle, Trash2, Share2 } from 'lucide-react';
 import Link from 'next/link';
+import html2canvas from 'html2canvas';
 
 // Styles for react-pdf
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -46,6 +47,24 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
     const [containerDimensions, setContainerDimensions] = useState({ width: 800, height: 600 });
     const [pdfDimensions, setPdfDimensions] = useState<{ width: number; height: number } | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isCapturing, setIsCapturing] = useState(false);
+
+    // Favorites State
+    const [favorites, setFavorites] = useState<number[]>([]);
+    const [showFavorites, setShowFavorites] = useState(false);
+
+    // Load favorites from local storage on mount
+    useEffect(() => {
+        const saved = localStorage.getItem(`favorites_${title}`);
+        if (saved) {
+            setFavorites(JSON.parse(saved));
+        }
+    }, [title]);
+
+    // Save favorites to local storage
+    useEffect(() => {
+        localStorage.setItem(`favorites_${title}`, JSON.stringify(favorites));
+    }, [favorites, title]);
 
     useEffect(() => {
         const updateDimensions = () => {
@@ -84,6 +103,60 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
         setError('Failed to load PDF. Please try downloading it instead.');
     }
 
+    const handleScreenshot = async () => {
+        if (!book.current || isCapturing) return;
+
+        setIsCapturing(true);
+        try {
+            // Find the flipbook container element
+            // We target the HTMLFlipBook component's internal container if possible, or our wrapper
+            const element = document.querySelector('.react-pageflip-wrapper') as HTMLElement || containerRef.current;
+
+            if (element) {
+                const canvas = await html2canvas(element, {
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#18181b', // Match zinc-900
+                    scale: 2, // Higher quality
+                });
+
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = `${title.replace(/\s+/g, '_')}_Page_${pageNumber + 1}.png`;
+                link.click();
+            }
+        } catch (err) {
+            console.error('Screenshot failed:', err);
+        } finally {
+            setIsCapturing(false);
+        }
+    };
+
+    const toggleFavorite = () => {
+        const currentPage = pageNumber + 1;
+        setFavorites(prev => {
+            if (prev.includes(currentPage)) {
+                return prev.filter(p => p !== currentPage);
+            } else {
+                return [...prev, currentPage].sort((a, b) => a - b);
+            }
+        });
+    };
+
+    const handleWhatsApp = (pages?: number[]) => {
+        const pageList = pages || [pageNumber + 1];
+        const text = `Hello, I am interested in the designs shown on ${pageList.length > 1 ? 'pages' : 'page'} ${pageList.join(', ')} of the catalog "${title}".`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    };
+
+    const handleInquiry = (pages?: number[]) => {
+        const pageList = pages || [pageNumber + 1];
+        const subject = encodeURIComponent(`Inquiry: ${title}`);
+        const body = encodeURIComponent(`Hello,\n\nI am interested in the designs shown on ${pageList.length > 1 ? 'pages' : 'page'} ${pageList.join(', ')} of the catalog "${title}".\n\nPlease provide more details.\n\nBest regards,`);
+        window.open(`mailto:?subject=${subject}&body=${body}`);
+    };
+
     // Calculate optimal dimensions
     const availableWidth = containerDimensions.width;
     const availableHeight = containerDimensions.height;
@@ -114,7 +187,76 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
     }
 
     return (
-        <div className="flex flex-col h-screen bg-zinc-900 text-white overflow-hidden">
+        <div className="flex flex-col h-screen bg-zinc-900 text-white overflow-hidden relative">
+            {/* Favorites Modal */}
+            {showFavorites && (
+                <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-zinc-800 rounded-xl shadow-2xl max-w-md w-full max-h-[80vh] flex flex-col border border-zinc-700">
+                        <div className="p-4 border-b border-zinc-700 flex items-center justify-between">
+                            <h3 className="font-semibold text-lg flex items-center gap-2">
+                                <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                                Favorite Pages
+                            </h3>
+                            <button onClick={() => setShowFavorites(false)} className="p-1 hover:bg-zinc-700 rounded-full">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4">
+                            {favorites.length === 0 ? (
+                                <div className="text-center text-zinc-400 py-8">
+                                    <Heart className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                    <p>No favorite pages yet.</p>
+                                    <p className="text-sm mt-1">Click the heart icon while browsing to add pages.</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {favorites.map(page => (
+                                        <div key={page} className="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-zinc-700/50">
+                                            <span className="font-medium">Page {page}</span>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        book.current?.pageFlip().flip(page - 1);
+                                                        setShowFavorites(false);
+                                                    }}
+                                                    className="text-xs bg-zinc-700 hover:bg-zinc-600 px-2 py-1 rounded transition-colors"
+                                                >
+                                                    View
+                                                </button>
+                                                <button
+                                                    onClick={() => setFavorites(prev => prev.filter(p => p !== page))}
+                                                    className="text-zinc-400 hover:text-red-400 p-1 transition-colors"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-4 border-t border-zinc-700 bg-zinc-800/50 rounded-b-xl space-y-2">
+                            <button
+                                onClick={() => handleWhatsApp(favorites)}
+                                disabled={favorites.length === 0}
+                                className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <MessageCircle className="w-5 h-5" /> Share List on WhatsApp
+                            </button>
+                            <button
+                                onClick={() => handleInquiry(favorites)}
+                                disabled={favorites.length === 0}
+                                className="w-full bg-zinc-700 hover:bg-zinc-600 text-white py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Mail className="w-5 h-5" /> Email List
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Toolbar */}
             <div className="flex items-center justify-between p-4 bg-zinc-800 border-b border-zinc-700 z-10 shrink-0">
                 <div className="flex items-center gap-4">
@@ -147,6 +289,52 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={toggleFavorite}
+                        className={`p-2 rounded-full transition-colors ${favorites.includes(pageNumber + 1) ? 'bg-red-500/10 text-red-500' : 'hover:bg-zinc-700 text-zinc-400'}`}
+                        title={favorites.includes(pageNumber + 1) ? "Remove from Favorites" : "Add to Favorites"}
+                    >
+                        <Heart className={`w-5 h-5 ${favorites.includes(pageNumber + 1) ? 'fill-current' : ''}`} />
+                    </button>
+
+                    <button
+                        onClick={() => setShowFavorites(true)}
+                        className="p-2 hover:bg-zinc-700 rounded-full transition-colors relative"
+                        title="View Favorites"
+                    >
+                        <List className="w-5 h-5" />
+                        {favorites.length > 0 && (
+                            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-zinc-800" />
+                        )}
+                    </button>
+
+                    <div className="w-px h-6 bg-zinc-700 mx-1 hidden sm:block" />
+
+                    <button
+                        onClick={() => handleWhatsApp()}
+                        className="p-2 hover:bg-zinc-700 rounded-full transition-colors hidden sm:block"
+                        title="Share on WhatsApp"
+                    >
+                        <MessageCircle className="w-5 h-5" />
+                    </button>
+
+                    <button
+                        onClick={() => handleInquiry()}
+                        className="p-2 hover:bg-zinc-700 rounded-full transition-colors hidden sm:block"
+                        title="Ask about this page"
+                    >
+                        <Mail className="w-5 h-5" />
+                    </button>
+
+                    <button
+                        onClick={handleScreenshot}
+                        disabled={isCapturing}
+                        className="p-2 hover:bg-zinc-700 rounded-full transition-colors"
+                        title="Save Screenshot"
+                    >
+                        <Camera className="w-5 h-5" />
+                    </button>
+
                     {downloadUrl && (
                         <a
                             href={downloadUrl}
@@ -195,52 +383,56 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
                     >
                         {numPages > 0 && pdfDimensions && (
                             // @ts-ignore - Types for react-pageflip are sometimes loose
-                            <HTMLFlipBook
-                                width={Math.floor(bookWidth)}
-                                height={Math.floor(bookHeight)}
-                                size="fixed"
-                                minWidth={200}
-                                maxWidth={1500}
-                                minHeight={300}
-                                maxHeight={2000}
-                                maxShadowOpacity={0.5}
-                                showCover={true}
-                                mobileScrollSupport={true}
-                                ref={book}
-                                onFlip={(e) => setPageNumber(e.data)}
-                                className="shadow-2xl"
-                                startPage={0}
-                                drawShadow={true}
-                                flippingTime={1000}
-                                usePortrait={false}
-                                startZIndex={0}
-                                autoSize={true}
-                                clickEventForward={true}
-                                useMouseEvents={true}
-                                swipeDistance={30}
-                                showPageCorners={true}
-                                disableFlipByClick={false}
-                            >
-                                {Array.from(new Array(numPages), (el, index) => {
-                                    const PageComponent = index === 0 || index === numPages - 1 ? PageCover : PageContent;
-                                    return (
-                                        <PageComponent key={index} number={index + 1}>
-                                            <div className="w-full h-full flex items-center justify-center bg-white">
-                                                <Page
-                                                    pageNumber={index + 1}
-                                                    width={Math.floor(bookWidth)}
-                                                    renderAnnotationLayer={false}
-                                                    renderTextLayer={false}
-                                                    className="w-full h-full"
-                                                />
-                                            </div>
-                                            <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-mono">
-                                                {index + 1}
-                                            </div>
-                                        </PageComponent>
-                                    );
-                                })}
-                            </HTMLFlipBook>
+                            <div className="react-pageflip-wrapper flex justify-center items-center">
+                                {/* @ts-ignore */}
+                                <HTMLFlipBook
+                                    width={Math.floor(bookWidth)}
+                                    height={Math.floor(bookHeight)}
+                                    size="fixed"
+                                    style={{}}
+                                    minWidth={200}
+                                    maxWidth={1500}
+                                    minHeight={300}
+                                    maxHeight={2000}
+                                    maxShadowOpacity={0.5}
+                                    showCover={true}
+                                    mobileScrollSupport={true}
+                                    ref={book}
+                                    onFlip={(e) => setPageNumber(e.data)}
+                                    className="shadow-2xl"
+                                    startPage={0}
+                                    drawShadow={true}
+                                    flippingTime={1000}
+                                    usePortrait={false}
+                                    startZIndex={0}
+                                    autoSize={true}
+                                    clickEventForward={true}
+                                    useMouseEvents={true}
+                                    swipeDistance={30}
+                                    showPageCorners={true}
+                                    disableFlipByClick={false}
+                                >
+                                    {Array.from(new Array(numPages), (el, index) => {
+                                        const PageComponent = index === 0 || index === numPages - 1 ? PageCover : PageContent;
+                                        return (
+                                            <PageComponent key={index} number={index + 1}>
+                                                <div className="w-full h-full flex items-center justify-center bg-white">
+                                                    <Page
+                                                        pageNumber={index + 1}
+                                                        width={Math.floor(bookWidth)}
+                                                        renderAnnotationLayer={false}
+                                                        renderTextLayer={false}
+                                                        className="w-full h-full"
+                                                    />
+                                                </div>
+                                                <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-mono">
+                                                    {index + 1}
+                                                </div>
+                                            </PageComponent>
+                                        );
+                                    })}
+                                </HTMLFlipBook>
+                            </div>
                         )}
                     </Document>
                 )}
