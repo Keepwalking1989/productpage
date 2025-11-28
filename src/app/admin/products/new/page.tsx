@@ -113,7 +113,13 @@ export default function NewProductPage() {
 
         setLoading(true);
         try {
-            const data = await generateProductInfo(mainImage);
+            const data = await generateProductInfo({
+                imageUrl: mainImage,
+                category: formData.category || undefined,
+                size: formData.size || undefined,
+                name: formData.name || undefined,
+                finish: formData.finish || undefined,
+            });
             setFormData(prev => ({
                 ...prev,
                 name: data.name || prev.name,
