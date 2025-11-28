@@ -49,6 +49,10 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
     const [error, setError] = useState<string | null>(null);
     const [isCapturing, setIsCapturing] = useState(false);
 
+    // Loading State
+    const [isLoading, setIsLoading] = useState(true);
+    const [showFeatureGuide, setShowFeatureGuide] = useState(true);
+
     // Favorites State
     const [favorites, setFavorites] = useState<number[]>([]);
     const [showFavorites, setShowFavorites] = useState(false);
@@ -85,6 +89,7 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
     async function onDocumentLoadSuccess(pdf: any) {
         setNumPages(pdf.numPages);
         setError(null);
+        setIsLoading(false); // PDF loaded successfully
 
         try {
             // Get dimensions of the first page to determine aspect ratio
@@ -186,6 +191,73 @@ export function FlipBookViewer({ pdfUrl, title, downloadUrl }: FlipBookViewerPro
 
     return (
         <div className="flex flex-col h-screen bg-zinc-900 text-white overflow-hidden relative">
+            {/* Feature Guide Modal - Shows while loading */}
+            {showFeatureGuide && isLoading && (
+                <div className="absolute inset-0 z-50 bg-gradient-to-br from-purple-900/95 via-blue-900/95 to-indigo-900/95 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl max-w-2xl w-full border border-white/20 overflow-hidden">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-center relative">
+                            <button
+                                onClick={() => setShowFeatureGuide(false)}
+                                className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
+                                aria-label="Close guide"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                            <h2 className="text-2xl font-bold mb-2">Catalog Features</h2>
+                            <p className="text-white/90 text-sm">While your catalog is loading, discover what you can do...</p>
+                        </div>
+
+                        {/* Features Grid */}
+                        <div className="p-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                {/* Feature 1: Screenshot */}
+                                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <Camera className="w-7 h-7 text-white" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2">Save Screenshots</h3>
+                                    <p className="text-white/70 text-sm">Capture any page and save it as an image to your device instantly.</p>
+                                </div>
+
+                                {/* Feature 2: WhatsApp */}
+                                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <MessageCircle className="w-7 h-7 text-white" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2">WhatsApp Inquiry</h3>
+                                    <p className="text-white/70 text-sm">Share designs directly via WhatsApp with pre-filled messages.</p>
+                                </div>
+
+                                {/* Feature 3: Email */}
+                                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <Mail className="w-7 h-7 text-white" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2">Email Owner</h3>
+                                    <p className="text-white/70 text-sm">Send inquiries about specific designs directly to the owner.</p>
+                                </div>
+
+                                {/* Feature 4: Favorites */}
+                                <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <Heart className="w-7 h-7 text-white" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2">Save Favorites</h3>
+                                    <p className="text-white/70 text-sm">Mark your favorite designs and share them all at once.</p>
+                                </div>
+                            </div>
+
+                            {/* Loading Indicator */}
+                            <div className="flex flex-col items-center gap-4 text-white/90">
+                                <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                                <p className="text-sm font-medium">Loading your catalog...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Favorites Modal */}
             {showFavorites && (
                 <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
