@@ -6,9 +6,12 @@ The AI-powered product description generator uses Google's Gemini API to automat
 ## API Configuration
 
 ### API Key
-- **API Key**: `AIzaSyAYLgAn7GXEw3FPGlaPeFx_5GxzNwdxweI`
-- **Location**: Stored in `.env` file as `GEMINI_API_KEY`
+- **Environment Variable**: `GEMINI_API_KEY`
+- **Location**: Must be set in `.env` file (local) and Vercel environment variables (production)
 - **Model**: `gemini-1.5-flash`
+- **How to get**: Visit [Google AI Studio](https://aistudio.google.com/app/apikey) to create your API key
+
+⚠️ **IMPORTANT**: Never commit your actual API key to the repository. Always use environment variables.
 
 ## Features
 
