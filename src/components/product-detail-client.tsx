@@ -51,9 +51,10 @@ export function ProductDetailClient({
         <>
             <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
                 {/* Left: Image Gallery */}
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin">
+                    {/* Main Image */}
                     <div
-                        className="bg-muted rounded-2xl overflow-hidden border border-border relative cursor-pointer hover:opacity-90 transition-opacity min-h-[400px] flex items-center justify-center"
+                        className="bg-muted rounded-2xl overflow-hidden border border-border relative cursor-pointer hover:opacity-90 transition-opacity h-[400px] flex items-center justify-center"
                         onClick={() => handleImageClick(0)}
                     >
                         {mainImage ? (
@@ -61,7 +62,7 @@ export function ProductDetailClient({
                             <img
                                 src={mainImage.directUrl}
                                 alt={product.name}
-                                className="w-full h-auto object-contain"
+                                className="max-w-full max-h-full object-contain"
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -70,24 +71,24 @@ export function ProductDetailClient({
                         )}
                     </div>
 
-                    {/* Thumbnails (if multiple images) */}
+                    {/* Other Images (if multiple images) */}
                     {otherImages.length > 0 && (
-                        <div className="grid grid-cols-4 gap-4">
+                        <>
                             {otherImages.map((img, idx) => (
                                 <div
                                     key={idx}
-                                    className="aspect-square bg-muted rounded-lg overflow-hidden border border-border cursor-pointer hover:ring-2 ring-primary transition-all"
+                                    className="bg-muted rounded-2xl overflow-hidden border border-border cursor-pointer hover:ring-2 ring-primary transition-all h-[250px] flex items-center justify-center"
                                     onClick={() => handleImageClick(idx + 1)}
                                 >
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={img.directUrl}
                                         alt={`${product.name} view ${idx + 2}`}
-                                        className="w-full h-full object-cover"
+                                        className="max-w-full max-h-full object-contain"
                                     />
                                 </div>
                             ))}
-                        </div>
+                        </>
                     )}
                 </div>
 

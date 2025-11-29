@@ -14,13 +14,13 @@ export function ProductCard({ product }: ProductCardProps) {
         <Link href={`/products/${product.id}`} className="group block h-full">
             <div className="bg-card border border-border rounded-xl overflow-hidden h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 {/* Image */}
-                <div className="bg-muted relative overflow-hidden min-h-[200px] flex items-center justify-center">
+                <div className="aspect-square bg-muted relative overflow-hidden">
                     {imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                             src={imageUrl}
                             alt={product.name}
-                            className="w-full h-auto object-contain transition-transform duration-500 group-hover:scale-105"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
                         />
                     ) : (
@@ -29,7 +29,14 @@ export function ProductCard({ product }: ProductCardProps) {
                         </div>
                     )}
 
-                    {/* Overlay Badge */}
+                    {/* Product Name Overlay at Bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 pt-8">
+                        <h3 className="font-semibold text-lg text-white truncate">
+                            {product.name}
+                        </h3>
+                    </div>
+
+                    {/* Category Badge */}
                     <div className="absolute top-2 right-2">
                         <span className="bg-black/70 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
                             {product.size.category.name}
@@ -39,10 +46,6 @@ export function ProductCard({ product }: ProductCardProps) {
 
                 {/* Content */}
                 <div className="p-4 space-y-2">
-                    <h3 className="font-semibold text-lg truncate group-hover:text-primary transition-colors">
-                        {product.name}
-                    </h3>
-
                     <div className="space-y-1 text-sm text-muted-foreground">
                         <div className="flex justify-between">
                             <span>Size:</span>
