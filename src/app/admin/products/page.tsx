@@ -1,4 +1,4 @@
-import { Plus, Package, Search } from "lucide-react";
+import { Plus, Package, Search, Upload } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getGoogleDriveDirectLink } from "@/lib/google-drive";
@@ -30,12 +30,20 @@ export default async function AdminProductsPage() {
                     <h2 className="text-3xl font-bold tracking-tight">Products</h2>
                     <p className="text-muted-foreground">Manage your product inventory.</p>
                 </div>
-                <Link
-                    href="/admin/products/new"
-                    className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-                >
-                    <Plus className="w-4 h-4" /> Add Product
-                </Link>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href="/admin/products/bulk-upload"
+                        className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/80 transition-colors border border-border"
+                    >
+                        <Upload className="w-4 h-4" /> Bulk Upload
+                    </Link>
+                    <Link
+                        href="/admin/products/new"
+                        className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+                    >
+                        <Plus className="w-4 h-4" /> Add Product
+                    </Link>
+                </div>
             </div>
 
             <div className="flex items-center gap-4 bg-card p-4 rounded-xl border border-border">
