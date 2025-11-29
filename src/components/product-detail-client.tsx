@@ -51,44 +51,60 @@ export function ProductDetailClient({
         <>
             <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
                 {/* Left: Image Gallery */}
-                <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin">
-                    {/* Main Image */}
+                <div className="space-y-4">
+                    {/* Main Large Image */}
                     <div
-                        className="bg-muted rounded-2xl overflow-hidden border border-border relative cursor-pointer hover:opacity-90 transition-opacity h-[400px] flex items-center justify-center"
+                        className="bg-muted rounded-2xl overflow-hidden border border-border relative cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => handleImageClick(0)}
+                        style={{ height: 'calc(100vh - 250px)', maxHeight: '700px', minHeight: '500px' }}
                     >
                         {mainImage ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={mainImage.directUrl}
                                 alt={product.name}
-                                className="max-w-full max-h-full object-contain"
+                                className="w-full h-full object-contain"
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                                 No Image Available
                             </div>
                         )}
+
+                        {/* Image Counter */}
+                        {allImages.length > 1 && (
+                            <div className="absolute bottom-4 right-4 bg-black/70 text-white text-sm px-3 py-1 rounded-full backdrop-blur-sm">
+                                1 / {allImages.length}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Other Images (if multiple images) */}
+                    {/* Thumbnail Row (Partially Visible) */}
                     {otherImages.length > 0 && (
-                        <>
-                            {otherImages.map((img, idx) => (
-                                <div
-                                    key={idx}
-                                    className="bg-muted rounded-2xl overflow-hidden border border-border cursor-pointer hover:ring-2 ring-primary transition-all h-[250px] flex items-center justify-center"
-                                    onClick={() => handleImageClick(idx + 1)}
-                                >
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src={img.directUrl}
-                                        alt={`${product.name} view ${idx + 2}`}
-                                        className="max-w-full max-h-full object-contain"
-                                    />
-                                </div>
-                            ))}
-                        </>
+                        <div className="relative -mt-2">
+                            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+                                {otherImages.map((img, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex-shrink-0 bg-muted rounded-lg overflow-hidden border-2 border-border cursor-pointer hover:border-primary transition-all"
+                                        style={{ width: '120px', height: '120px' }}
+                                        onClick={() => handleImageClick(idx + 1)}
+                                    >
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={img.directUrl}
+                                            alt={`${product.name} view ${idx + 2}`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Fade effect on right to show more images */}
+                            {otherImages.length > 3 && (
+                                <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+                            )}
+                        </div>
                     )}
                 </div>
 

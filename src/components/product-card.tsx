@@ -30,7 +30,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     )}
 
                     {/* Product Name Overlay at Bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 pt-8">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-6 pt-12">
                         <h3 className="font-semibold text-lg text-white truncate">
                             {product.name}
                         </h3>
