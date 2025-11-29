@@ -20,7 +20,7 @@ export function ProductCard({ product }: ProductCardProps) {
                         <img
                             src={imageUrl}
                             alt={product.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                             loading="lazy"
                         />
                     ) : (
@@ -30,7 +30,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     )}
 
                     {/* Product Name Overlay at Bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-3 pt-10">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2 pt-6">
                         <h3 className="font-semibold text-lg text-white truncate">
                             {product.name}
                         </h3>
