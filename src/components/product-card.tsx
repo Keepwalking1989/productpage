@@ -14,13 +14,13 @@ export function ProductCard({ product }: ProductCardProps) {
         <Link href={`/products/${product.id}`} className="group block h-full">
             <div className="bg-card border border-border rounded-xl overflow-hidden h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 {/* Image */}
-                <div className="aspect-square bg-muted relative overflow-hidden">
+                <div className="bg-muted relative overflow-hidden min-h-[200px] flex items-center justify-center">
                     {imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                             src={imageUrl}
                             alt={product.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="w-full h-auto object-contain transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
                         />
                     ) : (
