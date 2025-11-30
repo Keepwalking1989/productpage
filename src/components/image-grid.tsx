@@ -32,8 +32,19 @@ export function ImageGrid({ images }: ImageGridProps) {
         rectangleVertical: [],
     });
     const [imagesLoaded, setImagesLoaded] = useState(false);
+    const [imageAspectRatios, setImageAspectRatios] = useState<Map<string, number>>(new Map());
+    const [needsImageCalculation, setNeedsImageCalculation] = useState(false);
 
-    // Group images by aspect ratio from size (not from actual image dimensions)
+    // Check if we need to calculate aspect ratios from images
+    // (when size name doesn't have numbers, aspectRatio will be 1 as default)
+    useEffect(() => {
+        // If all images have the same aspectRatio of 1, it might be a fallback
+        // We'll need to calculate from actual images
+        const allSameDefault = images.length > 0 && images.every(img => img.aspectRatio === 1);
+        setNeedsImageCalculation(allSameDefault);
+    }, [images]);
+
+    // Group images by aspect ratio from size (or from actual image if needed)
     useEffect(() => {
         const grouped: GroupedImages = {
             square: [],
@@ -42,17 +53,28 @@ export function ImageGrid({ images }: ImageGridProps) {
         };
 
         images.forEach((img) => {
-            // Use the aspect ratio from the size name, not from the actual image
-            const category = categorizeAspectRatio(img.aspectRatio);
-            grouped[category].push(img);
+            // Use calculated aspect ratio if available, otherwise use size-based
+            const aspectRatio = imageAspectRatios.get(img.id) || img.aspectRatio;
+            const category = categorizeAspectRatio(aspectRatio);
+            grouped[category].push({ ...img, aspectRatio });
         });
 
         setGroupedImages(grouped);
         setImagesLoaded(true);
-    }, [images]);
+    }, [images, imageAspectRatios]);
 
     const handleImageLoad = (imageId: string, event: React.SyntheticEvent<HTMLImageElement>) => {
-        // No need to recalculate aspect ratio - we use size-based ratio
+        // Only calculate aspect ratio from image if size name didn't have numbers
+        if (needsImageCalculation) {
+            const img = event.currentTarget;
+            const aspectRatio = img.naturalWidth / img.naturalHeight;
+
+            setImageAspectRatios((prev) => {
+                const newMap = new Map(prev);
+                newMap.set(imageId, aspectRatio);
+                return newMap;
+            });
+        }
     };
 
     const handleImageClick = (productId: string) => {

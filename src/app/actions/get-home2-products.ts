@@ -82,7 +82,7 @@ export async function getHome2Products(sizeId?: string) {
 
         // Calculate aspect ratio from size name
         const sizeInfo = products[0] ? parseSizeName(products[0].size.name) : null;
-        const sizeAspectRatio = sizeInfo?.aspectRatio || 1;
+        const sizeAspectRatio = sizeInfo?.aspectRatio || null; // null means calculate from image
 
         // Extract all images with their aspect ratios based on size
         const allImages: ImageWithAspectRatio[] = [];
@@ -92,7 +92,8 @@ export async function getHome2Products(sizeId?: string) {
                 allImages.push({
                     id: image.id,
                     url: image.url,
-                    aspectRatio: sizeAspectRatio, // Use size-based aspect ratio
+                    // Use size-based aspect ratio if available, otherwise will be calculated from image
+                    aspectRatio: sizeAspectRatio || 1, // 1 is temporary, will be updated on client
                     productId: product.id,
                     productName: product.name,
                     sizeName: product.size.name,
