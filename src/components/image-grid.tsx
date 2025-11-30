@@ -145,32 +145,16 @@ export function ImageGrid({ images }: ImageGridProps) {
     const createRows = (): React.ReactNode[] => {
         const rows: React.ReactNode[] = [];
 
-        type ImageWithType = ImageData & { type: string };
-
-        const allSortedImages: ImageWithType[] = [
-            ...groupedImages.square.map((img) => ({ ...img, type: 'square' as const })),
-            ...groupedImages.rectangleHorizontal.map((img) => ({ ...img, type: 'rectangleHorizontal' as const })),
-            ...groupedImages.rectangleVertical.map((img) => ({ ...img, type: 'rectangleVertical' as const })),
-        ];
-
-        // Group by type to create rows
-        const imagesByType: { [key: string]: ImageData[] } = {};
-        allSortedImages.forEach((img) => {
-            if (!imagesByType[img.type]) {
-                imagesByType[img.type] = [];
-            }
-            imagesByType[img.type].push(img);
-        });
-
-        // Render rows for each type
-        Object.entries(imagesByType).forEach(([type, imgs]) => {
-            // Split into rows of reasonable size (e.g., 4-6 images per row)
-            const imagesPerRow = type === 'square' ? 5 : 4;
-            for (let i = 0; i < imgs.length; i += imagesPerRow) {
-                const rowImages = imgs.slice(i, i + imagesPerRow);
-                rows.push(renderImageRow(rowImages, `${type}-${i}`));
-            }
-        });
+        // Render all images of each type in a single flex-wrap container
+        if (groupedImages.square.length > 0) {
+            rows.push(renderImageRow(groupedImages.square, 'square'));
+        }
+        if (groupedImages.rectangleHorizontal.length > 0) {
+            rows.push(renderImageRow(groupedImages.rectangleHorizontal, 'rectangleHorizontal'));
+        }
+        if (groupedImages.rectangleVertical.length > 0) {
+            rows.push(renderImageRow(groupedImages.rectangleVertical, 'rectangleVertical'));
+        }
 
         return rows;
     };
