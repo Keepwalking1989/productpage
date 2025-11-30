@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getGoogleDriveDirectLink } from '@/lib/google-drive';
 
 /**
  * Calculate aspect ratio category
@@ -88,30 +88,33 @@ export function ImageGrid({ images }: ImageGridProps) {
 
         return (
             <div key={rowType} className="flex w-full" style={{ height: rowHeight }}>
-                {rowImages.map((img) => (
-                    <div
-                        key={img.id}
-                        className="relative group cursor-pointer overflow-visible"
-                        style={{
-                            flex: `${img.aspectRatio} 1 0%`,
-                        }}
-                        onClick={() => handleImageClick(img.productId)}
-                    >
-                        <div className="relative w-full h-full transition-all duration-300 group-hover:z-50 group-hover:scale-130">
-                            <Image
-                                src={img.url}
-                                alt={img.productName}
-                                fill
-                                sizes="(max-width: 768px) 50vw, 33vw"
-                                className="object-cover transition-shadow duration-300 group-hover:shadow-2xl"
-                                onLoad={(e) => handleImageLoad(img.id, e)}
-                                loading="lazy"
-                            />
-                            {/* Overlay on hover */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                {rowImages.map((img) => {
+                    const imageUrl = getGoogleDriveDirectLink(img.url) || img.url;
+
+                    return (
+                        <div
+                            key={img.id}
+                            className="relative group cursor-pointer overflow-hidden"
+                            style={{
+                                flex: `${img.aspectRatio} 1 0%`,
+                            }}
+                            onClick={() => handleImageClick(img.productId)}
+                        >
+                            <div className="absolute inset-0 transition-all duration-300 group-hover:z-50 group-hover:scale-130">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={imageUrl}
+                                    alt=""
+                                    className="w-full h-full object-cover transition-shadow duration-300 group-hover:shadow-2xl"
+                                    onLoad={(e) => handleImageLoad(img.id, e)}
+                                    loading="lazy"
+                                />
+                                {/* Overlay on hover */}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         );
     };
