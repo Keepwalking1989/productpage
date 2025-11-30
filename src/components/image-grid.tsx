@@ -94,13 +94,13 @@ export function ImageGrid({ images }: ImageGridProps) {
                     return (
                         <div
                             key={img.id}
-                            className="relative group cursor-pointer overflow-hidden"
+                            className="relative group cursor-pointer"
                             style={{
                                 flex: `${img.aspectRatio} 1 0%`,
                             }}
                             onClick={() => handleImageClick(img.productId)}
                         >
-                            <div className="absolute inset-0 transition-all duration-300 group-hover:z-50 group-hover:scale-130">
+                            <div className="absolute inset-0 transition-all duration-300 group-hover:z-50 group-hover:scale-130 overflow-hidden">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={imageUrl}

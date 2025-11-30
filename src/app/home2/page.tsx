@@ -1,46 +1,32 @@
-import { Suspense } from 'react';
-import { getHome2Products } from '@/app/actions/get-home2-products';
-import { ImageGrid } from '@/components/image-grid';
-import { CollapsibleSidebar } from '@/components/collapsible-sidebar';
-import { Loader2 } from 'lucide-react';
+import { getHome2Products, getAvailableSizes } from '@/app/actions/get-home2-products';
+import { Home2Client } from '@/components/home2-client';
 
 export const metadata = {
     title: 'Home 2 - Image Gallery | Porcelain Tiles AI',
     description: 'Explore our complete collection of porcelain tiles in an immersive image gallery',
 };
 
-async function ImageGridWrapper() {
-    const images = await getHome2Products();
+export default async function Home2Page() {
+    // Fetch available sizes
+    const sizes = await getAvailableSizes();
 
-    if (images.length === 0) {
+    if (sizes.length === 0) {
         return (
             <div className="flex items-center justify-center py-24">
-                <p className="text-muted-foreground">No products found</p>
+                <p className="text-muted-foreground">No products available</p>
             </div>
         );
     }
 
-    return <ImageGrid images={images} />;
-}
+    // Fetch images for the first size by default
+    const initialSizeId = sizes[0].id;
+    const initialImages = await getHome2Products(initialSizeId);
 
-export default function Home2Page() {
     return (
-        <div className="relative min-h-screen">
-            {/* Collapsible Sidebar */}
-            <CollapsibleSidebar />
-
-            {/* Main Content Area */}
-            <div className="ml-12 transition-all duration-300">
-                <Suspense
-                    fallback={
-                        <div className="flex items-center justify-center py-24">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                        </div>
-                    }
-                >
-                    <ImageGridWrapper />
-                </Suspense>
-            </div>
-        </div>
+        <Home2Client
+            initialSizes={sizes}
+            initialImages={initialImages}
+            initialSizeId={initialSizeId}
+        />
     );
 }

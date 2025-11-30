@@ -10,10 +10,24 @@ import {
     BookOpen,
     Mail,
     LayoutGrid,
+    Ruler,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export function CollapsibleSidebar() {
+type SizeOption = {
+    id: string;
+    name: string;
+    categoryName: string;
+    productCount: number;
+};
+
+interface CollapsibleSidebarProps {
+    sizes?: SizeOption[];
+    selectedSizeId?: string;
+    onSizeChange?: (sizeId: string) => void;
+}
+
+export function CollapsibleSidebar({ sizes, selectedSizeId, onSizeChange }: CollapsibleSidebarProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const pathname = usePathname();
 
@@ -39,10 +53,12 @@ export function CollapsibleSidebar() {
         { href: '/contact', icon: Mail, label: 'Contact' },
     ];
 
+    const isHome2 = pathname === '/home2';
+
     return (
         <aside
             className={cn(
-                'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border-r transition-all duration-300 z-40',
+                'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border-r transition-all duration-300 z-40 overflow-y-auto',
                 isExpanded ? 'w-64' : 'w-12'
             )}
         >
@@ -88,6 +104,40 @@ export function CollapsibleSidebar() {
                     );
                 })}
             </nav>
+
+            {/* Size Filter - Only show on Home 2 page */}
+            {isHome2 && sizes && sizes.length > 0 && isExpanded && (
+                <div className="p-4 border-t">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Ruler className="w-4 h-4 text-muted-foreground" />
+                        <h3 className="font-semibold text-sm">Filter by Size</h3>
+                    </div>
+                    <div className="space-y-1">
+                        {sizes.map((size) => (
+                            <button
+                                key={size.id}
+                                onClick={() => onSizeChange?.(size.id)}
+                                className={cn(
+                                    'w-full text-left px-3 py-2 rounded-md text-sm transition-colors',
+                                    selectedSizeId === size.id
+                                        ? 'bg-primary text-primary-foreground font-medium'
+                                        : 'hover:bg-accent hover:text-accent-foreground'
+                                )}
+                            >
+                                <div className="flex justify-between items-center">
+                                    <span>{size.name}</span>
+                                    <span className="text-xs opacity-70">
+                                        {size.productCount}
+                                    </span>
+                                </div>
+                                <div className="text-xs opacity-70 mt-0.5">
+                                    {size.categoryName}
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
         </aside>
     );
 }

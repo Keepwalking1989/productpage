@@ -17,13 +17,56 @@ export type GroupedImages = {
 };
 
 /**
- * Fetch all products with images and group them by aspect ratio
- * This is optimized for the Home 2 image grid layout
+ * Fetch all available sizes for the size filter
  */
-export async function getHome2Products() {
+export async function getAvailableSizes() {
     try {
-        // Fetch all products with their images
+        const sizes = await prisma.size.findMany({
+            include: {
+                category: true,
+                _count: {
+                    select: { products: true },
+                },
+            },
+            orderBy: { name: 'asc' },
+        });
+
+        // Only return sizes that have products
+        return sizes
+            .filter((size) => size._count.products > 0)
+            .map((size) => ({
+                id: size.id,
+                name: size.name,
+                categoryName: size.category.name,
+                productCount: size._count.products,
+            }));
+    } catch (error) {
+        console.error('Error fetching available sizes:', error);
+        return [];
+    }
+}
+
+/**
+ * Fetch all products with images for a specific size
+ * If no sizeId is provided, fetch products from the first available size
+ */
+export async function getHome2Products(sizeId?: string) {
+    try {
+        // If no sizeId provided, get the first available size
+        let targetSizeId = sizeId;
+        if (!targetSizeId) {
+            const sizes = await getAvailableSizes();
+            if (sizes.length === 0) {
+                return [];
+            }
+            targetSizeId = sizes[0].id;
+        }
+
+        // Fetch all products with their images for the selected size
         const products = await prisma.product.findMany({
+            where: {
+                sizeId: targetSizeId,
+            },
             include: {
                 images: true,
             },
@@ -35,9 +78,6 @@ export async function getHome2Products() {
 
         for (const product of products) {
             for (const image of product.images) {
-                // For now, we'll calculate aspect ratio on the client side
-                // or use a default. In production, you might want to store
-                // width/height in the database
                 allImages.push({
                     id: image.id,
                     url: image.url,
@@ -48,9 +88,6 @@ export async function getHome2Products() {
             }
         }
 
-        // Group images by aspect ratio
-        // This will be done on the client side after images load
-        // to get accurate dimensions
         return allImages;
     } catch (error) {
         console.error('Error fetching home2 products:', error);
