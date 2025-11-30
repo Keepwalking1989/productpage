@@ -98,4 +98,9 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
   }
+
+  /* Image Grid Hover Effect */
+  .scale-130 {
+    transform: scale(1.3);
+  }
 }

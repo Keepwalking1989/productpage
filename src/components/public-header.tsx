@@ -17,6 +17,9 @@ export function PublicHeader() {
                     <Link href="/" className="hover:text-primary transition-colors">
                         Home
                     </Link>
+                    <Link href="/home2" className="hover:text-primary transition-colors">
+                        Home 2
+                    </Link>
                     <Link href="/catalogs" className="hover:text-primary transition-colors">
                         Catalogs
                     </Link>
