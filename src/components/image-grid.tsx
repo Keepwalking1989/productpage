@@ -85,8 +85,24 @@ export function ImageGrid({ images }: ImageGridProps) {
         if (rowImages.length === 0) return null;
 
         // Calculate row height based on aspect ratios
+        // For vertical images (aspect < 1), we need TALLER rows
+        // For horizontal images (aspect > 1), we need SHORTER rows
         const avgAspectRatio = rowImages.reduce((sum, img) => sum + img.aspectRatio, 0) / rowImages.length;
-        const rowHeight = avgAspectRatio > 1 ? '300px' : '400px';
+
+        let rowHeight: string;
+        if (avgAspectRatio < 0.7) {
+            // Very vertical (like 600x1200 = 0.5)
+            rowHeight = '600px';
+        } else if (avgAspectRatio < 1) {
+            // Somewhat vertical
+            rowHeight = '450px';
+        } else if (avgAspectRatio > 1.5) {
+            // Very horizontal
+            rowHeight = '250px';
+        } else {
+            // Square or slightly rectangular
+            rowHeight = '350px';
+        }
 
         return (
             <div key={rowType} className="flex w-full" style={{ height: rowHeight }}>
