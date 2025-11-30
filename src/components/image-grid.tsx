@@ -110,12 +110,17 @@ export function ImageGrid({ images }: ImageGridProps) {
                 {rowImages.map((img) => {
                     const imageUrl = getGoogleDriveDirectLink(img.url) || img.url;
 
+                    // Calculate max width based on aspect ratio and row height
+                    // For 600x1200 (ratio 0.5) with 300px height: maxWidth = 300 * 0.5 = 150px
+                    const maxWidth = `${parseInt(rowHeight) * img.aspectRatio}px`;
+
                     return (
                         <div
                             key={img.id}
                             className="relative group cursor-pointer"
                             style={{
-                                flex: `${img.aspectRatio} 1 0%`,
+                                flex: `0 0 ${maxWidth}`,
+                                maxWidth: maxWidth,
                             }}
                             onClick={() => handleImageClick(img.productId)}
                         >
