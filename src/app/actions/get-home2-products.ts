@@ -1,6 +1,7 @@
 'use server';
 
 import prisma from '@/lib/prisma';
+import { parseSizeName } from '@/lib/size-utils';
 
 export type ImageWithAspectRatio = {
     id: string;
@@ -8,6 +9,7 @@ export type ImageWithAspectRatio = {
     aspectRatio: number;
     productId: string;
     productName: string;
+    sizeName: string;
 };
 
 export type GroupedImages = {
@@ -34,12 +36,16 @@ export async function getAvailableSizes() {
         // Only return sizes that have products
         return sizes
             .filter((size) => size._count.products > 0)
-            .map((size) => ({
-                id: size.id,
-                name: size.name,
-                categoryName: size.category.name,
-                productCount: size._count.products,
-            }));
+            .map((size) => {
+                const sizeInfo = parseSizeName(size.name);
+                return {
+                    id: size.id,
+                    name: size.name,
+                    categoryName: size.category.name,
+                    productCount: size._count.products,
+                    aspectRatio: sizeInfo?.aspectRatio || 1,
+                };
+            });
     } catch (error) {
         console.error('Error fetching available sizes:', error);
         return [];
@@ -62,18 +68,23 @@ export async function getHome2Products(sizeId?: string) {
             targetSizeId = sizes[0].id;
         }
 
-        // Fetch all products with their images for the selected size
+        // Fetch all products with their images and size info for the selected size
         const products = await prisma.product.findMany({
             where: {
                 sizeId: targetSizeId,
             },
             include: {
                 images: true,
+                size: true,
             },
             orderBy: { createdAt: 'desc' },
         });
 
-        // Extract all images with their aspect ratios
+        // Calculate aspect ratio from size name
+        const sizeInfo = products[0] ? parseSizeName(products[0].size.name) : null;
+        const sizeAspectRatio = sizeInfo?.aspectRatio || 1;
+
+        // Extract all images with their aspect ratios based on size
         const allImages: ImageWithAspectRatio[] = [];
 
         for (const product of products) {
@@ -81,9 +92,10 @@ export async function getHome2Products(sizeId?: string) {
                 allImages.push({
                     id: image.id,
                     url: image.url,
-                    aspectRatio: 1, // Will be calculated on client
+                    aspectRatio: sizeAspectRatio, // Use size-based aspect ratio
                     productId: product.id,
                     productName: product.name,
+                    sizeName: product.size.name,
                 });
             }
         }

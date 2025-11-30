@@ -58,14 +58,14 @@ export function CollapsibleSidebar({ sizes, selectedSizeId, onSizeChange }: Coll
     return (
         <aside
             className={cn(
-                'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border-r transition-all duration-300 z-40 overflow-y-auto',
-                isExpanded ? 'w-64' : 'w-12'
+                'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border-r transition-all duration-300 z-40',
+                isExpanded ? 'w-64 overflow-y-auto' : 'w-12 overflow-hidden',
             )}
         >
             {/* Toggle Button */}
             <button
                 onClick={toggleSidebar}
-                className="absolute -right-3 top-6 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+                className="sticky top-6 left-full -ml-3 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:scale-110 transition-transform z-50"
                 aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
             >
                 {isExpanded ? (

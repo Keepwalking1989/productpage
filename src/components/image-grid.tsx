@@ -3,19 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getGoogleDriveDirectLink } from '@/lib/google-drive';
-
-/**
- * Calculate aspect ratio category
- */
-function categorizeAspectRatio(ratio: number): 'square' | 'rectangleHorizontal' | 'rectangleVertical' {
-    if (ratio >= 0.9 && ratio <= 1.1) {
-        return 'square';
-    } else if (ratio < 0.9) {
-        return 'rectangleVertical';
-    } else {
-        return 'rectangleHorizontal';
-    }
-}
+import { categorizeAspectRatio } from '@/lib/size-utils';
 
 type ImageData = {
     id: string;
@@ -23,6 +11,7 @@ type ImageData = {
     aspectRatio: number;
     productId: string;
     productName: string;
+    sizeName: string;
 };
 
 type GroupedImages = {
@@ -42,10 +31,9 @@ export function ImageGrid({ images }: ImageGridProps) {
         rectangleHorizontal: [],
         rectangleVertical: [],
     });
-    const [loadedCount, setLoadedCount] = useState(0);
-    const [imageAspectRatios, setImageAspectRatios] = useState<Map<string, number>>(new Map());
+    const [imagesLoaded, setImagesLoaded] = useState(false);
 
-    // Group images by aspect ratio whenever aspect ratios change
+    // Group images by aspect ratio from size (not from actual image dimensions)
     useEffect(() => {
         const grouped: GroupedImages = {
             square: [],
@@ -54,25 +42,17 @@ export function ImageGrid({ images }: ImageGridProps) {
         };
 
         images.forEach((img) => {
-            const aspectRatio = imageAspectRatios.get(img.id) || 1;
-            const category = categorizeAspectRatio(aspectRatio);
-            grouped[category].push({ ...img, aspectRatio });
+            // Use the aspect ratio from the size name, not from the actual image
+            const category = categorizeAspectRatio(img.aspectRatio);
+            grouped[category].push(img);
         });
 
         setGroupedImages(grouped);
-    }, [images, imageAspectRatios]);
+        setImagesLoaded(true);
+    }, [images]);
 
     const handleImageLoad = (imageId: string, event: React.SyntheticEvent<HTMLImageElement>) => {
-        const img = event.currentTarget;
-        const aspectRatio = img.naturalWidth / img.naturalHeight;
-
-        setImageAspectRatios((prev) => {
-            const newMap = new Map(prev);
-            newMap.set(imageId, aspectRatio);
-            return newMap;
-        });
-
-        setLoadedCount((prev) => prev + 1);
+        // No need to recalculate aspect ratio - we use size-based ratio
     };
 
     const handleImageClick = (productId: string) => {

@@ -18,6 +18,7 @@ type ImageData = {
     aspectRatio: number;
     productId: string;
     productName: string;
+    sizeName: string;
 };
 
 interface Home2ClientProps {
