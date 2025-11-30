@@ -106,21 +106,21 @@ export function ImageGrid({ images }: ImageGridProps) {
         }
 
         return (
-            <div key={rowType} className="flex w-full" style={{ height: rowHeight }}>
+            <div key={rowType} className="flex flex-wrap w-full">
                 {rowImages.map((img) => {
                     const imageUrl = getGoogleDriveDirectLink(img.url) || img.url;
 
-                    // Calculate max width based on aspect ratio and row height
-                    // For 600x1200 (ratio 0.5) with 300px height: maxWidth = 300 * 0.5 = 150px
-                    const maxWidth = `${parseInt(rowHeight) * img.aspectRatio}px`;
+                    // Calculate width based on aspect ratio and row height
+                    // For 600x1200 (ratio 0.5) with 300px height: width = 300 * 0.5 = 150px
+                    const imageWidth = `${parseInt(rowHeight) * img.aspectRatio}px`;
 
                     return (
                         <div
                             key={img.id}
-                            className="relative group cursor-pointer"
+                            className="relative group cursor-pointer flex-shrink-0"
                             style={{
-                                flex: `0 0 ${maxWidth}`,
-                                maxWidth: maxWidth,
+                                width: imageWidth,
+                                height: rowHeight,
                             }}
                             onClick={() => handleImageClick(img.productId)}
                         >
