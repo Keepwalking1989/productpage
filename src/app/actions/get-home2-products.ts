@@ -84,14 +84,16 @@ export async function getHome2Products(sizeId?: string) {
         const sizeInfo = products[0] ? parseSizeName(products[0].size.name) : null;
         const sizeAspectRatio = sizeInfo?.aspectRatio || null; // null means calculate from image
 
-        // Extract all images with their aspect ratios based on size
+        // Extract only the first image from each product with aspect ratio based on size
         const allImages: ImageWithAspectRatio[] = [];
 
         for (const product of products) {
-            for (const image of product.images) {
+            // Only include the first image if the product has images
+            if (product.images.length > 0) {
+                const firstImage = product.images[0];
                 allImages.push({
-                    id: image.id,
-                    url: image.url,
+                    id: firstImage.id,
+                    url: firstImage.url,
                     // Use size-based aspect ratio if available, otherwise will be calculated from image
                     aspectRatio: sizeAspectRatio || 1, // 1 is temporary, will be updated on client
                     productId: product.id,
