@@ -118,7 +118,7 @@ export function ImageGrid({ images }: ImageGridProps) {
                             }}
                             onClick={() => handleImageClick(img.productId)}
                         >
-                            <div className="absolute inset-0 transition-all duration-300 group-hover:z-50 group-hover:scale-130 overflow-hidden">
+                            <div className="absolute inset-0 transition-all duration-300 group-hover:z-10 group-hover:scale-130 overflow-hidden">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={imageUrl}
@@ -127,8 +127,6 @@ export function ImageGrid({ images }: ImageGridProps) {
                                     onLoad={(e) => handleImageLoad(img.id, e)}
                                     loading="lazy"
                                 />
-                                {/* Overlay on hover */}
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
                             </div>
                         </div>
                     );
