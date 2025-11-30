@@ -42,10 +42,10 @@ export function ImageGrid({ images }: ImageGridProps) {
         rectangleHorizontal: [],
         rectangleVertical: [],
     });
-    const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
-    const imageRefs = useRef<Map<string, HTMLImageElement>>(new Map());
+    const [loadedCount, setLoadedCount] = useState(0);
+    const [imageAspectRatios, setImageAspectRatios] = useState<Map<string, number>>(new Map());
 
-    // Group images by aspect ratio after they load
+    // Group images by aspect ratio whenever aspect ratios change
     useEffect(() => {
         const grouped: GroupedImages = {
             square: [],
@@ -54,26 +54,25 @@ export function ImageGrid({ images }: ImageGridProps) {
         };
 
         images.forEach((img) => {
-            if (loadedImages.has(img.id)) {
-                const category = categorizeAspectRatio(img.aspectRatio);
-                grouped[category].push(img);
-            }
+            const aspectRatio = imageAspectRatios.get(img.id) || 1;
+            const category = categorizeAspectRatio(aspectRatio);
+            grouped[category].push({ ...img, aspectRatio });
         });
 
         setGroupedImages(grouped);
-    }, [images, loadedImages]);
+    }, [images, imageAspectRatios]);
 
     const handleImageLoad = (imageId: string, event: React.SyntheticEvent<HTMLImageElement>) => {
         const img = event.currentTarget;
         const aspectRatio = img.naturalWidth / img.naturalHeight;
 
-        // Update the image with its actual aspect ratio
-        const imageIndex = images.findIndex((i) => i.id === imageId);
-        if (imageIndex !== -1) {
-            images[imageIndex].aspectRatio = aspectRatio;
-        }
+        setImageAspectRatios((prev) => {
+            const newMap = new Map(prev);
+            newMap.set(imageId, aspectRatio);
+            return newMap;
+        });
 
-        setLoadedImages((prev) => new Set(prev).add(imageId));
+        setLoadedCount((prev) => prev + 1);
     };
 
     const handleImageClick = (productId: string) => {
@@ -83,8 +82,12 @@ export function ImageGrid({ images }: ImageGridProps) {
     const renderImageRow = (rowImages: ImageData[], rowType: string) => {
         if (rowImages.length === 0) return null;
 
+        // Calculate row height based on aspect ratios
+        const avgAspectRatio = rowImages.reduce((sum, img) => sum + img.aspectRatio, 0) / rowImages.length;
+        const rowHeight = avgAspectRatio > 1 ? '300px' : '400px';
+
         return (
-            <div key={rowType} className="flex w-full">
+            <div key={rowType} className="flex w-full" style={{ height: rowHeight }}>
                 {rowImages.map((img) => (
                     <div
                         key={img.id}
@@ -116,8 +119,6 @@ export function ImageGrid({ images }: ImageGridProps) {
     // Create rows by grouping consecutive images of the same type
     const createRows = (): React.ReactNode[] => {
         const rows: React.ReactNode[] = [];
-        let currentRow: ImageData[] = [];
-        let currentType: string | null = null;
 
         type ImageWithType = ImageData & { type: string };
 
@@ -151,17 +152,20 @@ export function ImageGrid({ images }: ImageGridProps) {
 
     return (
         <div className="w-full">
-            {/* Loading state */}
-            {loadedImages.size === 0 && (
+            {/* Loading state - only show if no images at all */}
+            {images.length === 0 && (
                 <div className="flex items-center justify-center py-24">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                 </div>
             )}
 
             {/* Image Grid */}
-            <div className="flex flex-col">
-                {createRows()}
-            </div>
+            {images.length > 0 && (
+                <div className="flex flex-col">
+                    {createRows()}
+                </div>
+            )}
         </div>
     );
 }
+
