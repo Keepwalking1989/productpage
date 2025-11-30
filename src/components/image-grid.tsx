@@ -87,21 +87,22 @@ export function ImageGrid({ images }: ImageGridProps) {
         // Calculate row height based on aspect ratios
         // For vertical images (aspect < 1), we need TALLER rows
         // For horizontal images (aspect > 1), we need SHORTER rows
+        // All heights reduced by 50% to show more images on screen
         const avgAspectRatio = rowImages.reduce((sum, img) => sum + img.aspectRatio, 0) / rowImages.length;
 
         let rowHeight: string;
         if (avgAspectRatio < 0.7) {
-            // Very vertical (like 600x1200 = 0.5)
-            rowHeight = '600px';
+            // Very vertical (like 600x1200 = 0.5) - was 600px, now 300px
+            rowHeight = '300px';
         } else if (avgAspectRatio < 1) {
-            // Somewhat vertical
-            rowHeight = '450px';
+            // Somewhat vertical - was 450px, now 225px
+            rowHeight = '225px';
         } else if (avgAspectRatio > 1.5) {
-            // Very horizontal
-            rowHeight = '250px';
+            // Very horizontal - was 250px, now 125px
+            rowHeight = '125px';
         } else {
-            // Square or slightly rectangular
-            rowHeight = '350px';
+            // Square or slightly rectangular - was 350px, now 175px
+            rowHeight = '175px';
         }
 
         return (
@@ -118,7 +119,7 @@ export function ImageGrid({ images }: ImageGridProps) {
                             }}
                             onClick={() => handleImageClick(img.productId)}
                         >
-                            <div className="absolute inset-0 transition-all duration-300 group-hover:z-10 group-hover:scale-130 overflow-hidden">
+                            <div className="absolute inset-0 transition-all duration-300 group-hover:z-10 group-hover:scale-160 overflow-hidden">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={imageUrl}
